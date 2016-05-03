@@ -1,0 +1,200 @@
+[
+  {
+    "name": "ANEGADA",
+    "earthquakes": 1,
+    "lat": 18.72724,
+    "lon": -64.34309
+  },
+  {
+    "name": "ANTIGUA",
+    "earthquakes": 34,
+    "lat": 17.07466,
+    "lon": -61.81752
+  },
+  {
+    "name": "BARBADOS",
+    "earthquakes": 5,
+    "lat": 13.19389,
+    "lon": -59.5432
+  },
+  {
+    "name": "BARBUDA",
+    "earthquakes": 1,
+    "lat": 17.6268,
+    "lon": -61.77073
+  },
+  {
+    "name": "BERMUDES",
+    "earthquakes": 2,
+    "lat": 32.3078,
+    "lon": -64.7505
+  },
+  {
+    "name": "BRESIL",
+    "earthquakes": 1,
+    "lat": -14.2350,
+    "lon": -51.9253
+  },
+  {
+    "name": "CAYMAN",
+    "earthquakes": 1,
+    "lat": 19.3133,
+    "lon": 81.2546
+  },
+  {
+    "name": "COSTA-RICA",
+    "earthquakes": 6,
+    "lat": 9.74892,
+    "lon": -83.75343
+  },
+  {
+    "name": "CUBA",
+    "earthquakes": 80,
+    "lat": 21.52176,
+    "lon": -77.78117
+  },
+  {
+    "name": "DOMINIQUE",
+    "earthquakes": 27,
+    "lat": 15.415,
+    "lon": -61.37098
+  },
+  {
+    "name": "GRENADA",
+    "earthquakes": 14,
+    "lat": 12.1165,
+    "lon": -61.679
+  },
+  {
+    "name": "GUADELOUPE",
+    "earthquakes": 438,
+    "lat": 16.265,
+    "lon": -61.551
+  },
+  {
+    "name": "GUYANA",
+    "earthquakes": 1,
+    "lat": 4.86042,
+    "lon": -58.93018
+  },
+  {
+    "name": "GUYANE",
+    "earthquakes": 2,
+    "lat": 3.93389,
+    "lon": -53.12578
+  },
+  {
+    "name": "HAITI",
+    "earthquakes": 36,
+    "lat": 18.97119,
+    "lon": -72.28521
+  },
+  {
+    "name": "HONDURAS",
+    "earthquakes": 2,
+    "lat": 15.2,
+    "lon": -86.2419
+  },
+  {
+    "name": "ILES VIERGES(USA)",
+    "earthquakes": 1,
+    "lat": 18.33576,
+    "lon": -64.89634
+  },
+  {
+    "name": "JAMAIQUE",
+    "earthquakes": 49,
+    "lat": 18.10958,
+    "lon": -77.29751
+  },
+  {
+    "name": "MARTINIQUE",
+    "earthquakes": 48,
+    "lat": 14.64153,
+    "lon": -61.02417
+  },
+  {
+    "name": "MEXIQUE",
+    "earthquakes": 1,
+    "lat": 23.634501,
+    "lon": -102.552784
+  },
+  {
+    "name": "MONTSERRAT",
+    "earthquakes": 2,
+    "lat": 16.742498,
+    "lon": -62.187366
+  },
+  {
+    "name": "NEVIS",
+    "earthquakes": 1,
+    "lat": 17.155356,
+    "lon": -62.579603
+  },
+  {
+    "name": "PORTO-RICO",
+    "earthquakes": 49,
+    "lat": 18.220833,
+    "lon": -66.590149
+  },
+  {
+    "name": "REPUBLIQUE DOMINICAINE",
+    "earthquakes": 7,
+    "lat": 18.735693,
+    "lon": -70.162651
+  },
+  {
+    "name": "SABA",
+    "earthquakes": 3,
+    "lat": 17.635464,
+    "lon": -63.232676
+  },
+  {
+    "name": "SAINT-CROIX",
+    "earthquakes": 5,
+    "lat": 17.705845,
+    "lon": -64.858516
+  },
+  {
+    "name": "SAINTE-LUCIE",
+    "earthquakes": 15,
+    "lat": 13.909444,
+    "lon": -60.978893
+  },
+  {
+    "name": "SAINT-EUSTATIUS",
+    "earthquakes": 1,
+    "lat": 17.489031,
+    "lon": -62.973555
+  },
+  {
+    "name": "SAINT-KITT'S",
+    "earthquakes": 13,
+    "lat": 17.34338,
+    "lon": -62.755904
+  },
+  {
+    "name": "SAINT-THOMAS",
+    "earthquakes": 65,
+    "lat": 18.3381,
+    "lon": -64.8941
+  },
+  {
+    "name": "SAINT-VINCENT",
+    "earthquakes": 4,
+    "lat": 12.9843,
+    "lon": -61.2872
+  },
+  {
+    "name": "TRINIDAD ET TOBAGO",
+    "earthquakes": 103,
+    "lat": 10.691803,
+    "lon": -61.222503
+  },
+  {
+    "name": "VENEZUELA",
+    "earthquakes": 57,
+    "lat": 6.42375,
+    "lon": -66.58973
+  }
+]

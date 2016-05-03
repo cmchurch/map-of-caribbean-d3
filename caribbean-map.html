@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>Map of the Caribbean and Latin America</title>
+        <title>Earthquakes in the Caribbean (1840-1900)</title>
         <script src="http://d3js.org/d3.v3.min.js"></script>
         <style type="text/css">
             svg {
@@ -15,32 +15,38 @@
                 //fill:rgba(255,255,255,0.5);
                 stroke:rgba(0,0,0,0.2);
             }
-            .bars rect {fill:rgba(12,12,12,0.2);}
+            .bars rect {opacity:0.5;}
             div.tooltip {	
                 position: absolute;			
                 text-align: center;
-                width: 130px;					
-                height: 60px;					
+                width: 150px;					
+                height: 80px;					
                 padding: 2px;				
-                font: 16px sans-serif;		
+                font: 20px sans-serif;		
                 background: lightsteelblue;	
                 border: 0px;		
                 border-radius: 8px;			
                 pointer-events: none;
                 color:#FFF;
                 font-weight:bold;
+                text-shadow:
+                    -1px -1px 0 #000,  
+                    1px -1px 0 #000,
+                    -1px 1px 0 #000,
+                     1px 1px 0 #000;
             }
-            div.tooltip span.eqs {font-style:italic;font-weight:normal;font-size:12px;}
-            #chart-title {text-align:center};
+            div.tooltip span.eqs {font-style:italic;font-weight:normal;font-size:14px;}
+            #chart-title {text-align:center;}
+            div#credits {text-align:center;}
         </style>
     </head>
     <body>
-    <h1 id="chart-title">Earthquakes in the Caribbean (1800-1900)</h1>
+    <h1 id="chart-title">Earthquakes in the Caribbean (1840-1900)</h1>
         <script type="text/javascript">
 
             //Width and height
             var w = window.innerWidth;
-            var h = window.innerHeight;
+            var h = window.innerHeight*.8;
   
             var countrystroke = 1.5;
   
@@ -67,28 +73,27 @@
             //Load in GeoJSON data
             d3.json("region_wb_Caribbean_subunits_min.json", function(json) {
 
-                  var center = d3.geo.centroid(json)
-                  var scale  = 150;
-                  var offset = [w/2, h/2];
-                  var projection = d3.geo.mercator().scale(scale).center(center)
-                      .translate(offset);
+            var offset = 150;
+            // Create a unit projection.
+            var projection = d3.geo.mercator()
+                .rotate([0,0,45])
+                .scale(1)
+                .translate([0, 0]);
 
-                  // create the path
-                  var path = d3.geo.path().projection(projection);
+            // Create a path generator.
+            var path = d3.geo.path()
+                .projection(projection);
 
-                  // using the path determine the bounds of the current map and use 
-                  // these to determine better values for the scale and translation
-                  var bounds  = path.bounds(json);
-                  var hscale  = scale*w  / (bounds[1][0] - bounds[0][0]);
-                  var vscale  = scale*h / (bounds[1][1] - bounds[0][1]);
-                  var scale   = (hscale < vscale) ? hscale : vscale;
-                  var offset  = [w - (bounds[0][0] + bounds[1][0])/2,
-                                    h - (bounds[0][1] + bounds[1][1])/2];
+            // Compute the bounds of a feature of interest, then derive scale & translate.
+            var b = path.bounds(json),
+                s = .95 / Math.max((b[1][0] - b[0][0]) / w, (b[1][1] - b[0][1]) / h),
+                t = [(w - s * (b[1][0] + b[0][0])) / 2, (h - s * (b[1][1] + b[0][1])) / 2 + offset];
 
-                  // new projection
-                  projection = d3.geo.mercator().center(center)
-                    .scale(scale).translate(offset);
-                  path = path.projection(projection);
+            // Update the projection to use computed scale & translate.
+            projection
+                .scale(s)
+                .translate(t);
+                        
             
                 //Bind data and create one path per GeoJSON feature
                 svg.selectAll("path")
@@ -99,46 +104,50 @@
                    .attr("class","country")
                    .style("stroke-width",countrystroke);
    
-
-                
                 //Add Bars to Represent Number of Earthquakes
-                   sampleData = [{"name": "Martinique", "coordinates": [-61.02417,14.64153], "barheight": 100},
-                  {"name": "Guadeloupe", "coordinates": [ -61.55100, 16.26500], "barheight": 10},
-                  {"name": "Guyane", "coordinates": [-53.12578, 3.93389], "barheight": 50}              
-                  ]
-
-                  var barwidth = 5;
-                  var baroffset = -barwidth/2;
-                  
-                  bars = svg.selectAll("g")
-                  .data(sampleData)
-                  .enter()
-                  .append("g")
-                  .attr("class", "bars")
-                  .attr("transform", function(d) {return "translate(" + projection(d.coordinates) + ")";});
-                  
-                  bars.append("rect")			      
-                          .attr('height',  function(d) {return d.barheight})
-                          .attr('width', barwidth)
-                          .attr('y', function(d) {return -(d.barheight)})
-                          .attr("class", "bars")
-                          .attr("transform", "translate(" + baroffset + ",0)")
-                          .on("mouseover", function(d) {
-                                div.transition()
-                                   .duration(200)		
-                                   .style("opacity", .9);		
-                                div.html("<p>"+d.name+"<br/><span class='eqs'>EQS: "+d.barheight+"</span></p>")
-                                   .style("left", (d3.event.pageX) + "px")		
-                                   .style("top", (d3.event.pageY - 28) + "px");
-                           })
-                           .on("mouseout", function(d) {		
-                                div.transition()		
-                                   .duration(500)		
-                                   .style("opacity", 0);	
-                            });
+                d3.json("earthquake-data.json", function(eqdata) {
+                      var maxeq = d3.max(eqdata, function(d) { return d.earthquakes; });
+                      var color_scale = d3.scale.linear().domain([0, maxeq]).range(['yellow', 'red'])
+                      var linear_scale = d3.scale.linear().domain([0, maxeq]).range([0,150]);
+                      
+                      var barwidth = 4;
+                      var baroffset = -barwidth/2;
+                      
+                      bars = svg.selectAll("g")
+                      .data(eqdata)
+                      .enter()
+                      .append("g")
+                      .attr("class", "bars")
+                      .attr("transform", function(d) {return "translate(" + projection([d.lon,d.lat]) + ")";});
+                      
+                      bars.append("rect")			      
+                              .attr('height',  function(d) {return linear_scale(d.earthquakes)})
+                              .attr('width', barwidth)
+                              .attr('y', function(d) {return -(linear_scale(d.earthquakes))})
+                              .attr("class", "bars")
+                              .attr("transform", "translate(" + baroffset + ",0)")
+                              .attr("fill",function(d) { return color_scale(d.earthquakes)})
+                              .on("mouseover", function(d) {
+                                    div.transition()
+                                       .duration(200)		
+                                       .style("opacity", .9);		
+                                    div.html("<p>"+d.name+"<br/><span class='eqs'>"+d.earthquakes+" earthquakes</span></p>")
+                                       .style("left", (d3.event.pageX) + "px")		
+                                       .style("top", (d3.event.pageY - 28) + "px");
+                               })
+                               .on("mouseout", function(d) {		
+                                    div.transition()		
+                                       .duration(500)		
+                                       .style("opacity", 0);	
+                                });
                
-            });
-                           
+                });
+            });                 
         </script>
+        
+        <div id="credits">
+        <p>Data from: Bureau de Recherches Géologiques et Minières/SisFrance-Antilles. <i>Sismicité historique de la France: Antilles-Guyane-Mer des Caraibes.</i> 2016, distributed by BRGM, http://www.sisfrance.net/Antilles/</p>
+        <p id="license">© Professor Christopher M. Church -- University of Nevada, Reno. <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a></p>
+        </div>
     </body>
 </html>

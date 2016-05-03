@@ -58,6 +58,48 @@
     </div>
         <script type="text/javascript">
 
+		function drawBars(data,svg,projection) {
+                      var maxeq = d3.max(data, function(d) { return d.earthquakes; });
+                      var color_scale = d3.scale.linear().domain([0, maxeq]).range(['yellow', 'red'])
+                      var linear_scale = d3.scale.linear().domain([0, maxeq]).range([0,150]);
+                      
+                      var barwidth = 4;
+                      var baroffset = -barwidth/2;
+                      
+                      bars = svg.selectAll("g")
+                      .data(data)
+                      .enter()
+                      .append("g")
+                      .attr("class", "bars")
+                      .attr("transform", function(d) {return "translate(" + projection([d.lon,d.lat]) + ")";});
+                      
+                      bars.append("rect")			      
+                              .attr('height',  function(d) {return linear_scale(d.earthquakes)})
+                              .attr('width', barwidth)
+                              .attr('y', function(d) {return -(linear_scale(d.earthquakes))})
+                              .attr("class", "bars")
+                              .attr("transform", "translate(" + baroffset + ",0)")
+                              .attr("fill",function(d) { return color_scale(d.earthquakes)})
+                              .on("mouseover", function(d) {
+                                    div.transition()
+                                       .duration(200)		
+                                       .style("opacity", .9);		
+                                    div.html("<p>"+d.name+"<br/><span class='eqs'>"+d.earthquakes+" earthquakes</span></p>")
+                                       .style("left", (d3.event.pageX) + "px")		
+                                       .style("top", (d3.event.pageY - 28) + "px");
+                               })
+                               .on("mouseout", function(d) {		
+                                    div.transition()		
+                                       .duration(500)		
+                                       .style("opacity", 0);	
+                                });
+               
+                }
+		
+		
+		
+		
+		
             //Width and height
             var w = window.innerWidth;
             var h = window.innerHeight*.8;
@@ -75,6 +117,7 @@
                         .append("svg")
                         .attr("width", w)
                         .attr("height", h)
+						.attr("id","map")
                         .call(d3.behavior.zoom().on("zoom", function () {
                             svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")");
                             svg.selectAll(".country")
@@ -120,53 +163,18 @@
    
                 //Add Bars to Represent Number of Earthquakes
                 d3.json("earthquake-data.json", function(eqdata) {
-                      var maxeq = d3.max(eqdata, function(d) { return d.earthquakes; });
-                      var color_scale = d3.scale.linear().domain([0, maxeq]).range(['yellow', 'red'])
-                      var linear_scale = d3.scale.linear().domain([0, maxeq]).range([0,150]);
-                      
-                      var barwidth = 4;
-                      var baroffset = -barwidth/2;
-                      
-                      bars = svg.selectAll("g")
-                      .data(eqdata)
-                      .enter()
-                      .append("g")
-                      .attr("class", "bars")
-                      .attr("transform", function(d) {return "translate(" + projection([d.lon,d.lat]) + ")";});
-                      
-                      bars.append("rect")			      
-                              .attr('height',  function(d) {return linear_scale(d.earthquakes)})
-                              .attr('width', barwidth)
-                              .attr('y', function(d) {return -(linear_scale(d.earthquakes))})
-                              .attr("class", "bars")
-                              .attr("transform", "translate(" + baroffset + ",0)")
-                              .attr("fill",function(d) { return color_scale(d.earthquakes)})
-                              .on("mouseover", function(d) {
-                                    div.transition()
-                                       .duration(200)		
-                                       .style("opacity", .9);		
-                                    div.html("<p>"+d.name+"<br/><span class='eqs'>"+d.earthquakes+" earthquakes</span></p>")
-                                       .style("left", (d3.event.pageX) + "px")		
-                                       .style("top", (d3.event.pageY - 28) + "px");
-                               })
-                               .on("mouseout", function(d) {		
-                                    div.transition()		
-                                       .duration(500)		
-                                       .style("opacity", 0);	
-                                });
-               
-                });
-            });                 
-          
-        </script>
-        
-        
-        <script>d3.select('#slider').call(d3.slider().value( [1500,2008] ).min(1500).max(2008).step(1).orientation("vertical").on("slide", function(evt, value) {
+					drawBars(eqdata,svg,projection);
+				});
+		  
+				d3.select('#slider').call(d3.slider().value( [1500,2008] ).min(1500).max(2008).step(1).orientation("vertical").on("slide", function(evt, value) {
                       d3.select('#slidertextmin').text(value[ 0 ]);
                       d3.select('#slidertextmax').text(value[ 1 ]);
                 }));
+		  
+		  }); 
+          
         </script>
-        
+      
         <div id="credits">
         <p>Data from: Bureau de Recherches Géologiques et Minières/SisFrance-Antilles. <i>Sismicité historique de la France: Antilles-Guyane-Mer des Caraibes.</i> 2016, distributed by BRGM, http://www.sisfrance.net/Antilles/
         <br/>Original GeoJSON from: <a href="https://twitter.com/naesk">Sean Kelly</a></p>

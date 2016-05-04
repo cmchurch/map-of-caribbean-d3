@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>Earthquakes in the Caribbean (1840-1900)</title>
+        <title>Notable Earthquakes in the Caribbean</title>
         <script src="d3.v3.min.js"></script>
         <script src="d3.slider.js"></script>
         <link rel="stylesheet" href="d3.slider.css" /> 
@@ -23,9 +23,9 @@
             div.tooltip {	
                 position: absolute;			
                 text-align: center;
-                width: 150px;					
+                //width: 150px;					
                 height: 80px;					
-                padding: 2px;				
+                padding: 0px 20px 0px 20px;				
                 font: 20px sans-serif;		
                 background: lightsteelblue;	
                 border: 0px;		
@@ -48,43 +48,78 @@
         </style>
     </head>
     <body>
-    <h1 id="chart-title">Earthquakes in the Caribbean (1840-1900)</h1>
+    <h1 id="chart-title">Notable Earthquakes in the Caribbean (<span class="slidertextmin">1500</span>-<span class="slidertextmax">2008</span>)</h1>
     <div id="instructions"><p>Roll mouse to zoom; Click and Drag to Pan; Hover for Tooltip</p>
-    <h3 id="sliderscale"><span id="slidertextmax">2008</span><br/><br/><br/><span id="slidertextmin">1500</span></h3>
+    <h3 id="sliderscale"><span class="slidertextmax">2008</span><br/><br/><br/><span class="slidertextmin">1500</span></h3>
         <div id="slider"></div>
         
     
     
     </div>
         <script type="text/javascript">
+        var latlon;
+        
+        d3.csv("countries-lat-lon.csv", function(latlon_csv) {
+                        var latlon_json = d3.nest()
+                             .key(function(d) { return d.location; })
+                             .rollup(function(values) {
+                               return {
+                                 lat: d3.sum(values, function(d) { return d.lat }),
+                                 lon: d3.sum(values, function(d) { return d.lon })
+                               };
+                             })
+                             .map(latlon_csv);
+                             latlon = latlon_json;
+                        }); 
+        
+        function countRange(data,min,max) {
+            return d3.nest()
+              .key(function(d) { return d.location; })
+              .rollup(function(values) {
+                 return d3.sum(values, function(d) {
+                    var year=parseInt(d.year);
+                    if (year> min && year<max) return d.earthquakes;
+                 });
+               })
+               .entries(data);
+               
+               
+        }
 
+        
 		function drawBars(data,svg,projection) {
-                      var maxeq = d3.max(data, function(d) { return d.earthquakes; });
+                      svg.selectAll("rect").remove(); //This shouldn't be here, but I can't get bars.exit().remove() to work properly
+                      
+                      var maxeq = d3.max(data, function(d) { return d.values; });
                       var color_scale = d3.scale.linear().domain([0, maxeq]).range(['yellow', 'red'])
-                      var linear_scale = d3.scale.linear().domain([0, maxeq]).range([0,150]);
+                      var linear_scale = d3.scale.linear().domain([0, maxeq]).range([0,maxeq/2]);
                       
                       var barwidth = 4;
                       var baroffset = -barwidth/2;
                       
-                      bars = svg.selectAll("g")
-                      .data(data)
-                      .enter()
+                      var bars = svg.selectAll("g.bars")
+                      .data(data);
+                      
+                      
+                      bars.enter()
                       .append("g")
                       .attr("class", "bars")
-                      .attr("transform", function(d) {return "translate(" + projection([d.lon,d.lat]) + ")";});
-                      
+                      .attr("transform", function(d) {
+                               return "translate(" + projection([latlon[d.key].lon,latlon[d.key].lat]) + ")";
+                      });
+                     
                       bars.append("rect")			      
-                              .attr('height',  function(d) {return linear_scale(d.earthquakes)})
+                              .attr('height',  function(d) {return linear_scale(d.values)})
                               .attr('width', barwidth)
-                              .attr('y', function(d) {return -(linear_scale(d.earthquakes))})
+                              .attr('y', function(d) {return -(linear_scale(d.values))})
                               .attr("class", "bars")
                               .attr("transform", "translate(" + baroffset + ",0)")
-                              .attr("fill",function(d) { return color_scale(d.earthquakes)})
+                              .attr("fill",function(d) { return color_scale(d.values)})
                               .on("mouseover", function(d) {
                                     div.transition()
                                        .duration(200)		
                                        .style("opacity", .9);		
-                                    div.html("<p>"+d.name+"<br/><span class='eqs'>"+d.earthquakes+" earthquakes</span></p>")
+                                    div.html("<p>"+d.key+"<br/><span class='eqs'>"+d.values+" earthquakes</span></p>")
                                        .style("left", (d3.event.pageX) + "px")		
                                        .style("top", (d3.event.pageY - 28) + "px");
                                })
@@ -93,7 +128,7 @@
                                        .duration(500)		
                                        .style("opacity", 0);	
                                 });
-               
+                       bars.exit().remove(); // can't get enter and exit to work right
                 }
 		
 		
@@ -130,7 +165,7 @@
             //Load in GeoJSON data
             d3.json("region_wb_Caribbean_subunits_min.json", function(json) {
 
-            var offset = 150;
+            var offset = 300;
             // Create a unit projection.
             var projection = d3.geo.mercator()
                 .rotate([0,0,45])
@@ -161,15 +196,24 @@
                    .attr("class","country")
                    .style("stroke-width",countrystroke);
    
-                //Add Bars to Represent Number of Earthquakes
-                d3.json("earthquake-data.json", function(eqdata) {
-					drawBars(eqdata,svg,projection);
-				});
-		  
-				d3.select('#slider').call(d3.slider().value( [1500,2008] ).min(1500).max(2008).step(1).orientation("vertical").on("slide", function(evt, value) {
-                      d3.select('#slidertextmin').text(value[ 0 ]);
-                      d3.select('#slidertextmax').text(value[ 1 ]);
-                }));
+          
+                //INITIAL LOAD OF EARTHQUAKE DATA
+                d3.csv("year-location-earthquakes.csv", function(csv_data) {                  
+                                          
+                       
+                    var data = countRange(csv_data,1500,2008);
+                    drawBars(data,svg,projection);
+                    
+                    d3.select('#slider').call(d3.slider().value( [1500,2008] ).min(1500).max(2008).step(1).orientation("vertical").on("slide", function(evt, value) {
+                        var data = countRange(csv_data,value[ 0 ],value[ 1 ]);
+                        drawBars(data,svg,projection);
+                        d3.select('.slidertextmin').text(value[ 0 ]);
+                        d3.select('.slidertextmax').text(value[ 1 ]);
+                    }));
+               
+                });
+          
+				
 		  
 		  }); 
           

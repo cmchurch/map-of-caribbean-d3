@@ -209,8 +209,8 @@
                     d3.select('#slider').call(d3.slider().value( [1500,2008] ).min(1500).max(2008).step(1).orientation("vertical").on("slide", function(evt, value) {
                         var data = countRange(csv_data,value[ 0 ],value[ 1 ]);
                         drawBars(data,svg,projection,d3.select('input[name="rescale"]').node().checked);
-                        d3.select('.slidertextmin').text(value[ 0 ]);
-                        d3.select('.slidertextmax').text(value[ 1 ]);
+                        d3.selectAll('.slidertextmin').text(value[ 0 ]);
+                        d3.selectAll('.slidertextmax').text(value[ 1 ]);
                         d3.select("input[name='rescale']").on("change", function() {drawBars(data,svg,projection,d3.select('input[name="rescale"]').node().checked);});
                     }));
                

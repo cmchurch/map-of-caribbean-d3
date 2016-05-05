@@ -44,15 +44,15 @@
             div#credits {text-align:center;}
             div#instructions {position:absolute; left:10%;width:100px;top:30%;padding:10px;border:1px solid #000;background-color:white;}
             h3#sliderscale {float:right;margin:0px;}
-        
+            p#rescale {font-size:10px;padding-top:12px;}
         </style>
     </head>
     <body>
     <h1 id="chart-title">Notable Earthquakes in the Caribbean (<span class="slidertextmin">1500</span>-<span class="slidertextmax">2008</span>)</h1>
-    <div id="instructions"><p>Roll mouse to zoom; Click and Drag to Pan; Hover for Tooltip</p>
+    <div id="instructions"><p>Roll mouse to zoom; Click and drag to pan; hover for Tooltip</p>
     <h3 id="sliderscale"><span class="slidertextmax">2008</span><br/><br/><br/><span class="slidertextmin">1500</span></h3>
         <div id="slider"></div>
-        
+        <p id="rescale">Rescale based on current range? <input type="checkbox" name="rescale" value="yes"/></p>
     
     
     </div>
@@ -87,12 +87,12 @@
         }
 
         
-		function drawBars(data,svg,projection) {
+		function drawBars(data,svg,projection,rescale=false) {
                       svg.selectAll("rect").remove(); //This shouldn't be here, but I can't get bars.exit().remove() to work properly
-                      
                       var maxeq = d3.max(data, function(d) { return d.values; });
+                      if (rescale==true){ var upperrange=300;} else {var upperrange=maxeq;}
                       var color_scale = d3.scale.linear().domain([0, maxeq]).range(['yellow', 'red'])
-                      var linear_scale = d3.scale.linear().domain([0, maxeq]).range([0,maxeq/2]);
+                      var linear_scale = d3.scale.linear().domain([0, maxeq]).range([0,upperrange/2]);
                       
                       var barwidth = 4;
                       var baroffset = -barwidth/2;
@@ -204,11 +204,14 @@
                     var data = countRange(csv_data,1500,2008);
                     drawBars(data,svg,projection);
                     
+                    
+                    
                     d3.select('#slider').call(d3.slider().value( [1500,2008] ).min(1500).max(2008).step(1).orientation("vertical").on("slide", function(evt, value) {
                         var data = countRange(csv_data,value[ 0 ],value[ 1 ]);
-                        drawBars(data,svg,projection);
+                        drawBars(data,svg,projection,d3.select('input[name="rescale"]').node().checked);
                         d3.select('.slidertextmin').text(value[ 0 ]);
                         d3.select('.slidertextmax').text(value[ 1 ]);
+                        d3.select("input[name='rescale']").on("change", function() {drawBars(data,svg,projection,d3.select('input[name="rescale"]').node().checked);});
                     }));
                
                 });
